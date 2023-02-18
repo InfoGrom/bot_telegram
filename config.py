@@ -1,7 +1,6 @@
-#BOT_API_TOKEN = ''
+BOT_API_TOKEN = ''
 
-CHAT_GPT_LIST = [
-    ]
+CHAT_GPT_LIST = []
 
 DATABASE = 'database.db'
 
