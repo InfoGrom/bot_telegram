@@ -17,8 +17,9 @@ class TelegramBot:
     self.name_bot_command = name_bot_command
 
     self.dp.message_handler(commands=["start"])(self.process_start_command)
-    self.dp.message_handler(commands=["pay"])(self.pay_command_handler)
     self.dp.message_handler(commands=["info"])(self.info_command_handler)
+    self.dp.message_handler(commands=["help"])(self.help_command_handler)
+    self.dp.message_handler(commands=["pay"])(self.pay_command_handler)
     self.dp.message_handler()(self.echo_message)
 
     # Запуск бота
@@ -82,6 +83,21 @@ class TelegramBot:
       "Вы можете поддержать проект, оплатив тариф 'Плюс' нажав на кнопку ниже.",
       reply_markup=inline_kb)
 
+  # Функция ответа на команду /help
+  async def help_command_handler(self, message: types.Message):
+    user_id = message.from_user.id
+    settings_user = self.GetUserSettings(user_id)
+
+    if (settings_user["error"]):
+      settings_user = settings_user["result"]
+    else:
+      return
+
+    text = f"📝 Инструкция по эксплуатации:\n\nДобро пожаловать в инструкцию по эксплуатации бота ИИ! ⏳ Информация скоро обновится...;"
+    await self.bot.send_message(chat_id=message.chat.id,
+                                text=text,
+                                reply_to_message_id=message.message_id)
+
   def GetUserSettings(self, userid):
     userdata = self.database.query(
       f"SELECT * FROM settings WHERE userid={userid}")
@@ -103,7 +119,7 @@ class TelegramBot:
     balance = settings_user["balance"]
     lang = settings_user["lang"]
     tokens = settings_user["tokens"]
-    text = f"🖥 Личный кабинет пользователя:\n\n🆔 Ваш ID: {user_id};\n🙋‍♂️ Ваше имя: {message.from_user.username};\n\n💰 Осталось: {balance}₽ ~ {tokens} токенов;"
+    text = f"🖥 Личный кабинет пользователя:\n\n👤 Ваш ID: {user_id}\n🧑‍💻 Ваше имя: @{message.from_user.username}\n\n❓ Задано вопросов: 0 шт.\n🔸 Осталось: ~ {tokens} токенов\n\n💳 Ваш баланс: {balance}₽"
     await self.bot.send_message(chat_id=message.chat.id,
                                 text=text,
                                 reply_to_message_id=message.message_id)
@@ -135,16 +151,17 @@ class TelegramBot:
         #recipient_username = message.reply_to_message.from_user.username
         await self.bot.send_message(
           chat_id=message.chat.id,
-          text=f"❤️ @{me.username} выразил(а) Вам благодарность!",
+          text=f"❤️ @{username} выразил(а) Вам благодарность!",
           reply_to_message_id=message.reply_to_message.message_id)
         print(
-          f"(@{username} -> bot): {rq}\n(bot -> @{username}): ❤️ @{me.username} выразил(а) Вам благодарность!"
+          f"(@{username} -> bot): {rq}\n(bot -> @{username}): ❤️ @{username} выразил(а) Вам благодарность!"
         )
         return
-
+      
     # Анимация "Печатает":
     await self.bot.send_chat_action(chat_id=message.chat.id, action='typing')
 
+   
     # С запросом ключевого слова "Иванов":
     if self.name_bot_command in rq or f'{self.name_bot_command},' in rq:
       generated_text = self.chatgpt.getAnswer(message=rq,

@@ -1,6 +1,7 @@
 import openai
 import mtranslate
 import logging
+import telegram
 
 class ChatGPT:
     # Добавляем логирование в файл
