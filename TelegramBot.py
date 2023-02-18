@@ -76,11 +76,11 @@ class TelegramBot:
   # Функция ответа на команду /pay
   async def pay_command_handler(self, message: types.Message):
     inline_kb = types.InlineKeyboardMarkup()
-    inline_btn = types.InlineKeyboardButton(text='Поддержать проект',
+    inline_btn = types.InlineKeyboardButton(text='🎫 Поддержать проект',
                                             url='https://www.tinkoff.ru/cf/1EQCoywNvN7')
     inline_kb.add(inline_btn)
     await message.answer(
-      "Вы можете поддержать проект, оплатив тариф 'Плюс' нажав на кнопку ниже.",
+      "Вы можете поддержать проект, нажав на кнопку ниже. Это поможет нам обновлять и модернизировать 'улучшать' ИИ",
       reply_markup=inline_kb)
 
   def GetUserSettings(self, userid):
