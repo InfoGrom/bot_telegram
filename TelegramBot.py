@@ -3,6 +3,8 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 from ChatGPT import ChatGPT
 from DataBase import DataBase
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+from telegram.ext import CallbackQueryHandler
 from lang import *
 
 
@@ -27,17 +29,17 @@ class TelegramBot:
 
   # Функция регистрации пользователя в бд
   def RegisterUser(self,
-                   username,
-                   userid,
-                   firstname,
-                   lastname,
-                   banned=0,
-                   is_spam=1,
-                   balance=0,
-                   lang='ru',
-                   tokens=0,
-                   question=0,
-                   rating=0):
+                  username,
+                  userid,
+                  firstname,
+                  lastname,
+                  banned=0,
+                  is_spam=1,
+                  balance=0,
+                  lang='ru',
+                  tokens=0,
+                  question=0,
+                  rating=0):
     try:
       userdata = self.database.query(
         f"SELECT * FROM users WHERE userid={userid}")
@@ -46,7 +48,10 @@ class TelegramBot:
           f"INSERT INTO users (username, userid, firstname, lastname, banned, is_spam) VALUES('{username}', '{userid}', '{firstname}', '{lastname}', {banned}, {is_spam})",
           commit=True)
         self.database.query(
-          f"INSERT INTO settings (userid, balance, lang, tokens) VALUES('{userid}', {balance}, '{lang}', {tokens}, {question}, {rating})",
+          f"INSERT INTO settings (userid, balance, lang, tokens, question, rating) VALUES('{userid}', {balance}, '{lang}', {tokens}, {question}, {rating})",
+          commit=True)
+        self.database.query(
+          f"UPDATE settings SET question = question + 1 WHERE userid={userid}",
           commit=True)
         return True
       return False
@@ -82,7 +87,7 @@ class TelegramBot:
                                             url='https://www.tinkoff.ru/cf/1EQCoywNvN7')
     inline_kb.add(inline_btn)
     await message.answer(
-      "Вы можете поддержать проект, нажав на кнопку ниже. Это поможет нам обновлять и модернизировать 'улучшать' ИИ. С уважением администрация!!!",
+      "Вы можете поддержать проект, нажав на кнопку ниже. Это поможет нам обновлять и улучшать ИИ. С уважением администрация!",
       reply_markup=inline_kb)
 
   def GetUserSettings(self, userid):
@@ -108,7 +113,7 @@ class TelegramBot:
     tokens = settings_user["tokens"]
     question = settings_user ["question"]
     rating = settings_user ["rating"]
-    text = f"🖥 Личный кабинет пользователя:\n\nВаш ID: {user_id}\nВаше имя: @{message.from_user.username}\n\nОсталось: ~ {tokens} токенов.\nЗадано вопросов: {question} шт.\nВаш рейтинг {rating}: \n\nВаш баланс: {balance}₽"
+    text = f"🖥 Личный кабинет пользователя:\n\nВаш ID: {user_id}\nВаше имя: @{message.from_user.username}\n\nОсталось: ~ {tokens} токена(ов).\nЗадано вопроса(ов): {question} шт.\nВаш рейтинг {rating}: \n\nВаш баланс: {balance}₽"
     await self.bot.send_message(chat_id=message.chat.id,
                                 text=text,
                                 reply_to_message_id=message.message_id)
@@ -140,6 +145,20 @@ class TelegramBot:
 
     me = await self.bot.get_me()
     print(me.username)
+
+
+    # Ответное сообщение пользователю на реакцию:
+    if message.text == 'Ссылка':
+        keyboard_markup = types.InlineKeyboardMarkup(row_width=2)
+        url_button = types.InlineKeyboardButton(text='ДА', url='https://t.me/IvanovGPTbot')
+        delete_button = types.InlineKeyboardButton(text='НЕТ', callback_data='delete')
+        keyboard_markup.add(url_button, delete_button)
+        await self.bot.send_message(
+            chat_id=message.chat.id,
+            text='Вы искали ссылку на меня?',
+            reply_to_message_id=message.message_id,
+            reply_markup=keyboard_markup
+        )
 
     # Ответное сообщение пользователю на реакцию:
     if rq in [
