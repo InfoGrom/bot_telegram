@@ -39,7 +39,8 @@ class TelegramBot:
                   lang='ru',
                   tokens=0,
                   question=0,
-                  rating=0):
+                  rating=0,
+                  gratitude=0):
     try:
       userdata = self.database.query(
         f"SELECT * FROM users WHERE userid={userid}")
@@ -48,7 +49,7 @@ class TelegramBot:
           f"INSERT INTO users (username, userid, firstname, lastname, banned, is_spam) VALUES('{username}', '{userid}', '{firstname}', '{lastname}', {banned}, {is_spam})",
           commit=True)
         self.database.query(
-          f"INSERT INTO settings (userid, balance, lang, tokens, question, rating) VALUES('{userid}', {balance}, '{lang}', {tokens}, {question}, {rating})",
+          f"INSERT INTO settings (userid, balance, lang, tokens, question, rating, gratitude) VALUES('{userid}', {balance}, '{lang}', {tokens}, {question}, {rating}, {gratitude})",
           commit=True)
         self.database.query(
           f"UPDATE settings SET question = question + 1 WHERE userid={userid}",
@@ -113,7 +114,8 @@ class TelegramBot:
     tokens = settings_user["tokens"]
     question = settings_user ["question"]
     rating = settings_user ["rating"]
-    text = f"🖥 Личный кабинет пользователя:\n\nВаш ID: {user_id}\nВаше имя: @{message.from_user.username}\n\nОсталось: ~ {tokens} токена(ов).\nЗадано вопроса(ов): {question} шт.\nВаш рейтинг {rating}: \n\nВаш баланс: {balance}₽"
+    gratitude = settings_user ["gratitude"]
+    text = f"👤 Личный кабинет пользователя:\n\nВаш ID: {user_id}\nВаше имя: @{message.from_user.username}\n\nВаш рейтинг {rating}\nВы поблагодарили: {gratitude}\n\nЗадано вопросов: {question}\nОсталось токенов: {tokens}\n\nВаш баланс: {balance}₽"
     await self.bot.send_message(chat_id=message.chat.id,
                                 text=text,
                                 reply_to_message_id=message.message_id)
