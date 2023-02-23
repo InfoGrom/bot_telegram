@@ -3,8 +3,6 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 from ChatGPT import ChatGPT
 from DataBase import DataBase
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import CallbackQueryHandler
 from lang import *
 
 
@@ -35,12 +33,10 @@ class TelegramBot:
                   lastname,
                   banned=0,
                   is_spam=1,
-                  balance=0,
+                  balance=100,
                   lang='ru',
-                  tokens=0,
-                  question=0,
-                  rating=0,
-                  gratitude=0):
+                  tokens=500,
+                  ratings=0):
     try:
       userdata = self.database.query(
         f"SELECT * FROM users WHERE userid={userid}")
@@ -49,16 +45,13 @@ class TelegramBot:
           f"INSERT INTO users (username, userid, firstname, lastname, banned, is_spam) VALUES('{username}', '{userid}', '{firstname}', '{lastname}', {banned}, {is_spam})",
           commit=True)
         self.database.query(
-          f"INSERT INTO settings (userid, balance, lang, tokens, question, rating, gratitude) VALUES('{userid}', {balance}, '{lang}', {tokens}, {question}, {rating}, {gratitude})",
-          commit=True)
-        self.database.query(
-          f"UPDATE settings SET question = question + 1 WHERE userid={userid}",
+          f"INSERT INTO settings (userid, balance, lang, tokens, ratings) VALUES('{userid}', {balance}, '{lang}', {tokens}, {ratings})",
           commit=True)
         return True
       return False
     except:
       return False
-
+    
   # Функция провеки пользователя в базе данных
   def CheckUser(self, userid):
     userdata = self.database.query(
@@ -98,7 +91,7 @@ class TelegramBot:
       return {"result": userdata, "error": False}
     else:
       return {"result": userdata, "error": True}
-
+    
   # Функция ответа на команду /info
   async def info_command_handler(self, message: types.Message):
     user_id = message.from_user.id
@@ -112,14 +105,13 @@ class TelegramBot:
     balance = settings_user["balance"]
     lang = settings_user["lang"]
     tokens = settings_user["tokens"]
-    question = settings_user ["question"]
-    rating = settings_user ["rating"]
-    gratitude = settings_user ["gratitude"]
-    text = f"👤 Личный кабинет пользователя:\n\nВаш ID: {user_id}\nВаше имя: @{message.from_user.username}\n\nВаш рейтинг {rating}\nВы поблагодарили: {gratitude}\n\nЗадано вопросов: {question}\nОсталось токенов: {tokens}\n\nВаш баланс: {balance}₽"
+    ratings = settings_user ["ratings"]
+    text = f"\n\n<b>Ваш ID:</b> {user_id}\n<b>Ваше имя:</b> <code>{message.from_user.username}</code>\n\n<b>Ваш рейтинг:</b> {ratings}\n<b>Осталось токенов:</b> {tokens}\n\n<b>Ваш баланс:</b> {balance}₽"
     await self.bot.send_message(chat_id=message.chat.id,
                                 text=text,
-                                reply_to_message_id=message.message_id)
-
+                                reply_to_message_id=message.message_id,
+                                parse_mode='HTML')
+    
   # Функция ответа на команду /help
   async def help_command_handler(self, message: types.Message):
     user_id = message.from_user.id
@@ -148,7 +140,6 @@ class TelegramBot:
     me = await self.bot.get_me()
     print(me.username)
 
-
     # Ответное сообщение пользователю на реакцию:
     if message.text == 'Ссылка':
         keyboard_markup = types.InlineKeyboardMarkup(row_width=2)
@@ -169,18 +160,24 @@ class TelegramBot:
         'Благодарствую', 'Мерси', 'Большое спасибо', 'Спасибо большое',
         'Спасибо большое,', 'Спасибо,', 'Благодарю,', 'Благодарствую,',
         'Мерси,', 'Большое спасибо,', 'Спасибо за ответ', 'Спасибо за ответ!',
-        'Спасибо за информацию!', 'Спасибо за информацию.'
+        'Спасибо за информацию!', 'Спасибо за информацию.', '+', 'Ок, спасибо',
+        'Ок спасибо', 'Ок, срасибо!', 'Ок'
     ]:
       if message.reply_to_message and message.reply_to_message.from_user.username:
-        #recipient_username = message.reply_to_message.from_user.username
-        await self.bot.send_message(
-          chat_id=message.chat.id,
-          text=f"@{username} выразил(а) Вам благодарность!",
-          reply_to_message_id=message.reply_to_message.message_id)
-        print(
-          f"(@{username} -> bot): {rq}\n(bot -> @{username}): @{username} выразил(а) Вам благодарность!"
-        )
-        return
+          # получаем имя пользователя, отправившего благодарность
+          recipient_username = message.reply_to_message.from_user.username
+          # формируем текст сообщения с упоминанием пользователя
+          text = f"👍 <code>{username}</code> выразил(а) Вам благодарность!"
+          # отправляем сообщение с упоминанием пользователя и парсингом HTML
+          await self.bot.send_message(
+              chat_id=message.chat.id,
+              text=text,
+              reply_to_message_id=message.reply_to_message.message_id,
+              parse_mode='HTML'
+          )
+          # выводим сообщение об успешной отправке
+          print(f"({username} -> bot): {rq}\n(bot -> {username}): {username} выразил(а) Вам благодарность!")
+          return
 
     # Анимация "Печатает":
     await self.bot.send_chat_action(chat_id=message.chat.id, action='typing')
@@ -197,3 +194,5 @@ class TelegramBot:
       print(
         f"(@{username} -> bot): {rq}\n(bot -> @{username}): {generated_text['message']}"
       )
+
+
