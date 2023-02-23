@@ -194,5 +194,3 @@ class TelegramBot:
       print(
         f"(@{username} -> bot): {rq}\n(bot -> @{username}): {generated_text['message']}"
       )
-
-
