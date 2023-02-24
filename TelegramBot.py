@@ -25,32 +25,30 @@ class TelegramBot:
     # Запуск бота
     executor.start_polling(self.dp)
 
-  # Функция регистрации пользователя в бд
   def RegisterUser(self,
-                  username,
-                  userid,
-                  firstname,
-                  lastname,
-                  banned=0,
-                  is_spam=1,
-                  balance=100,
-                  lang='ru',
-                  tokens=500,
-                  ratings=0):
-    try:
-      userdata = self.database.query(
-        f"SELECT * FROM users WHERE userid={userid}")
-      if len(userdata) <= 0:
-        self.database.query(
-          f"INSERT INTO users (username, userid, firstname, lastname, banned, is_spam) VALUES('{username}', '{userid}', '{firstname}', '{lastname}', {banned}, {is_spam})",
-          commit=True)
-        self.database.query(
-          f"INSERT INTO settings (userid, balance, lang, tokens, ratings) VALUES('{userid}', {balance}, '{lang}', {tokens}, {ratings})",
-          commit=True)
-        return True
-      return False
-    except:
-      return False
+                    username,
+                    userid,
+                    firstname,
+                    lastname,
+                    banned=0,
+                    is_spam=1,
+                    balance=100,
+                    lang='ru',
+                    tokens=500,
+                    ratings=0):
+      try:
+          userdata = self.database.query(f"SELECT * FROM users WHERE userid={userid}")
+          if len(userdata) <= 0:
+              self.database.query(
+                  f"INSERT INTO users (username, userid, firstname, lastname, banned, is_spam) VALUES('{username}', '{userid}', '{firstname}', '{lastname}', {banned}, {is_spam})",
+                  commit=True)
+              self.database.query(
+                  f"INSERT INTO settings (userid, balance, lang, tokens, ratings) VALUES('{userid}', {balance}, '{lang}', {tokens}, {ratings})",
+                  commit=True)
+              return True
+          return False
+      except:
+          return False
     
   # Функция провеки пользователя в базе данных
   def CheckUser(self, userid):
@@ -163,21 +161,23 @@ class TelegramBot:
         'Спасибо за информацию!', 'Спасибо за информацию.', '+', 'Ок, спасибо',
         'Ок спасибо', 'Ок, срасибо!', 'Ок'
     ]:
-      if message.reply_to_message and message.reply_to_message.from_user.username:
-          # получаем имя пользователя, отправившего благодарность
-          recipient_username = message.reply_to_message.from_user.username
-          # формируем текст сообщения с упоминанием пользователя
-          text = f"👍 <code>{username}</code> выразил(а) Вам благодарность!"
-          # отправляем сообщение с упоминанием пользователя и парсингом HTML
-          await self.bot.send_message(
-              chat_id=message.chat.id,
-              text=text,
-              reply_to_message_id=message.reply_to_message.message_id,
-              parse_mode='HTML'
-          )
-          # выводим сообщение об успешной отправке
-          print(f"({username} -> bot): {rq}\n(bot -> {username}): {username} выразил(а) Вам благодарность!")
-          return
+        if message.reply_to_message and message.reply_to_message.from_user.username:
+            # получаем имя пользователя, отправившего благодарность
+            recipient_username = message.reply_to_message.from_user.username
+            # формируем текст сообщения с упоминанием пользователя
+            text = f"👍 <code>{username}</code> выразил(а) Вам благодарность!"
+            # отправляем сообщение с упоминанием пользователя и парсингом HTML
+            await self.bot.send_message(
+                chat_id=message.chat.id,
+                text=text,
+                reply_to_message_id=message.reply_to_message.message_id,
+                parse_mode='HTML'
+            )
+            # увеличиваем количество ratings в таблице settings базы данных на 1
+            self.database.query(f"UPDATE settings SET ratings=ratings+1 WHERE userid={userid}", commit=True)
+            # выводим сообщение об успешной отправке
+            print(f"({username} -> bot): {rq}\n(bot -> {username}): {username} выразил(а) Вам благодарность!")
+            return
 
     # Анимация "Печатает":
     await self.bot.send_chat_action(chat_id=message.chat.id, action='typing')
