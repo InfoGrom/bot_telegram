@@ -148,7 +148,7 @@ class TelegramBot:
         keyboard_markup.add(url_button, delete_button)
         await self.bot.send_message(
             chat_id=message.chat.id,
-            text='Вы искали ссылку на меня?',
+            text='Вы искали ссылку на бота?',
             reply_to_message_id=message.message_id,
             reply_markup=keyboard_markup
         )
