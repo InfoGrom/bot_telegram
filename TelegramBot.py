@@ -138,6 +138,9 @@ class TelegramBot:
     me = await self.bot.get_me()
     print(me.username)
 
+      # Анимация "Печатает":
+    await self.bot.send_chat_action(chat_id=message.chat.id, action='typing')
+
     # Ответное сообщение пользователю на реакцию:
     if message.text == 'Ссылка':
         keyboard_markup = types.InlineKeyboardMarkup(row_width=2)
@@ -165,7 +168,7 @@ class TelegramBot:
             # получаем имя пользователя, отправившего благодарность
             recipient_username = message.reply_to_message.from_user.username
             # формируем текст сообщения с упоминанием пользователя
-            text = f"👍 <code>{username}</code> выразил(а) Вам благодарность!"
+            text = f"👍 <code>{username}</code> выразил(а) Вам благодарность (+)!"
             # отправляем сообщение с упоминанием пользователя и парсингом HTML
             await self.bot.send_message(
                 chat_id=message.chat.id,
@@ -175,12 +178,10 @@ class TelegramBot:
             )
             # увеличиваем количество ratings в таблице settings базы данных на 1
             self.database.query(f"UPDATE settings SET ratings=ratings+1 WHERE userid={userid}", commit=True)
+            self.database.query(f"UPDATE settings SET tokens=tokens+0.25 WHERE userid={userid}", commit=True)
             # выводим сообщение об успешной отправке
             print(f"({username} -> bot): {rq}\n(bot -> {username}): {username} выразил(а) Вам благодарность!")
             return
-
-    # Анимация "Печатает":
-    await self.bot.send_chat_action(chat_id=message.chat.id, action='typing')
 
     # С запросом ключевого слова "Иванов":
     if self.name_bot_command in rq or f'{self.name_bot_command},' in rq:
