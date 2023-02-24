@@ -32,7 +32,7 @@ class TelegramBot:
                     lastname,
                     banned=0,
                     is_spam=1,
-                    balance=100,
+                    balance=0,
                     lang='ru',
                     tokens=500,
                     ratings=0):
@@ -167,6 +167,8 @@ class TelegramBot:
         if message.reply_to_message and message.reply_to_message.from_user.username:
             # получаем имя пользователя, отправившего благодарность
             recipient_username = message.reply_to_message.from_user.username
+            # получаем id пользователя, которому отправлена благодарность
+            recipient_userid = message.reply_to_message.from_user.id
             # формируем текст сообщения с упоминанием пользователя
             text = f"👍 <code>{username}</code> выразил(а) Вам благодарность (+)!"
             # отправляем сообщение с упоминанием пользователя и парсингом HTML
@@ -177,8 +179,8 @@ class TelegramBot:
                 parse_mode='HTML'
             )
             # увеличиваем количество ratings в таблице settings базы данных на 1
-            self.database.query(f"UPDATE settings SET ratings=ratings+1 WHERE userid={userid}", commit=True)
-            self.database.query(f"UPDATE settings SET tokens=tokens+0.25 WHERE userid={userid}", commit=True)
+            self.database.query(f"UPDATE settings SET ratings=ratings+1 WHERE userid={recipient_userid}", commit=True)
+            self.database.query(f"UPDATE settings SET tokens=tokens+0.25 WHERE userid={recipient_userid}", commit=True)
             # выводим сообщение об успешной отправке
             print(f"({username} -> bot): {rq}\n(bot -> {username}): {username} выразил(а) Вам благодарность!")
             return
