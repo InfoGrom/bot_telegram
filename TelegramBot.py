@@ -3,6 +3,7 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.utils import executor
 from ChatGPT import ChatGPT
 from DataBase import DataBase
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from lang import *
 
 
@@ -74,13 +75,27 @@ class TelegramBot:
 
   # Функция ответа на команду /pay
   async def pay_command_handler(self, message: types.Message):
-    inline_kb = types.InlineKeyboardMarkup()
-    inline_btn = types.InlineKeyboardButton(text='🎫 Поддержать проект',
-                                            url='https://www.tinkoff.ru/cf/1EQCoywNvN7')
-    inline_kb.add(inline_btn)
-    await message.answer(
-      "Вы можете поддержать проект, нажав на кнопку ниже. Это поможет нам обновлять и улучшать ИИ. С уважением администрация!",
-      reply_markup=inline_kb)
+      inline_kb = types.InlineKeyboardMarkup()
+      inline_btn_500 = types.InlineKeyboardButton(text='💳 Купить 500 токенов за 100 руб.', url='https://www.tinkoff.ru/cf/1EQCoywNvN7')
+      inline_kb.add(inline_btn_500)
+
+      inline_btn_1000 = types.InlineKeyboardButton(text='💳 Купить 1000 токенов за 200 руб.',
+                                                  callback_data='buy_1000_tokens')
+      inline_kb.add(inline_btn_1000)
+
+      inline_btn_2500 = types.InlineKeyboardButton(text='💳 Купить 2500 токенов за 500 руб.',
+                                                  callback_data='buy_2500_tokens')
+      inline_kb.add(inline_btn_2500)
+
+      inline_btn_5000 = types.InlineKeyboardButton(text='💳 Купить 5000 токенов за 1000 руб.',
+                                                  callback_data='buy_5000_tokens')
+      inline_kb.add(inline_btn_5000)
+      
+      inline_btn_nonstop = types.InlineKeyboardButton(text='💳 Купить безлимит токенов за 2500 руб/в мес.',
+                                                  callback_data='buy_nonstop_tokens')
+      inline_kb.add(inline_btn_nonstop)
+
+      await message.answer("Вы можете купить токены и увеличить лимит запросов, нажав на кнопки ниже.", reply_markup=inline_kb)
 
   def GetUserSettings(self, userid):
     userdata = self.database.query(
