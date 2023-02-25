@@ -21,6 +21,7 @@ class TelegramBot:
     self.dp.message_handler(commands=["pay"])(self.pay_command_handler)
     self.dp.message_handler(commands=["info"])(self.info_command_handler)
     self.dp.message_handler(commands=["help"])(self.help_command_handler)
+    #self.dp.message_handler(commands=["help"])(self.ratings_command_handler)
     self.dp.message_handler()(self.echo_message)
 
     # Запуск бота
@@ -76,23 +77,16 @@ class TelegramBot:
   # Функция ответа на команду /pay
   async def pay_command_handler(self, message: types.Message):
       inline_kb = types.InlineKeyboardMarkup()
-      inline_btn_500 = types.InlineKeyboardButton(text='💳 Купить 500 токенов за 100 руб.', url='https://www.tinkoff.ru/cf/1EQCoywNvN7')
-      inline_kb.add(inline_btn_500)
-
-      inline_btn_1000 = types.InlineKeyboardButton(text='💳 Купить 1000 токенов за 200 руб.',
-                                                  callback_data='buy_1000_tokens')
+      inline_btn_1000 = types.InlineKeyboardButton(text='💳 Купить 1000 токенов за 200 руб.', url='https://oplata.qiwi.com/form?invoiceUid=6811758a-7f78-4034-9abe-2c0c56720419')
       inline_kb.add(inline_btn_1000)
 
-      inline_btn_2500 = types.InlineKeyboardButton(text='💳 Купить 2500 токенов за 500 руб.',
-                                                  callback_data='buy_2500_tokens')
+      inline_btn_2500 = types.InlineKeyboardButton(text='💳 Купить 2500 токенов за 500 руб.', url='https://oplata.qiwi.com/form?invoiceUid=4b9a39ed-5872-466a-9aa5-c0a5dce47933')
       inline_kb.add(inline_btn_2500)
 
-      inline_btn_5000 = types.InlineKeyboardButton(text='💳 Купить 5000 токенов за 1000 руб.',
-                                                  callback_data='buy_5000_tokens')
+      inline_btn_5000 = types.InlineKeyboardButton(text='💳 Купить 5000 токенов за 1000 руб.', url='https://oplata.qiwi.com/form?invoiceUid=bd2ba94d-1237-45e9-8643-6cfaebfac131')
       inline_kb.add(inline_btn_5000)
       
-      inline_btn_nonstop = types.InlineKeyboardButton(text='💳 Купить безлимит токенов за 2500 руб/в мес.',
-                                                  callback_data='buy_nonstop_tokens')
+      inline_btn_nonstop = types.InlineKeyboardButton(text='💳 Купить безлимит токенов за 2500 руб.', url='https://oplata.qiwi.com/form?invoiceUid=672431bf-17bc-4c2a-89ac-7810652bb5a3')
       inline_kb.add(inline_btn_nonstop)
 
       await message.answer("Вы можете купить токены и увеличить лимит запросов, нажав на кнопки ниже.", reply_markup=inline_kb)
@@ -139,8 +133,7 @@ class TelegramBot:
                                 text=text,
                                 reply_to_message_id=message.message_id,
                                 parse_mode='HTML')
-
-
+    
   # Функция ответа на сообщение
   async def echo_message(self, message: types.Message):
     message_id = message.message_id
@@ -183,11 +176,11 @@ class TelegramBot:
     ]:
         if message.reply_to_message and message.reply_to_message.from_user.username:
             # получаем имя пользователя, отправившего благодарность
-            recipient_username = message.reply_to_message.from_user.username
+            #recipient_username = message.reply_to_message.from_user.username
             # получаем id пользователя, которому отправлена благодарность
             recipient_userid = message.reply_to_message.from_user.id
             # формируем текст сообщения с упоминанием пользователя
-            text = f"👍 <code>{username}</code> выразил(а) Вам благодарность (+1)!"
+            text = f"👍 <code>{username}</code> выразил(а) Вам благодарность!"
             # отправляем сообщение с упоминанием пользователя и парсингом HTML
             await self.bot.send_message(
                 chat_id=message.chat.id,
@@ -195,13 +188,14 @@ class TelegramBot:
                 reply_to_message_id=message.reply_to_message.message_id,
                 parse_mode='HTML'
             )
+
             # увеличиваем количество ratings в таблице settings базы данных на 1
             self.database.query(f"UPDATE settings SET ratings=ratings+1 WHERE userid={recipient_userid}", commit=True)
             self.database.query(f"UPDATE settings SET tokens=tokens+0.25 WHERE userid={recipient_userid}", commit=True)
             # выводим сообщение об успешной отправке
             print(f"({username} -> bot): {rq}\n(bot -> {username}): {username} выразил(а) Вам благодарность!")
             return
-
+        
     # С запросом ключевого слова "Иванов":
     if self.name_bot_command in rq or f'{self.name_bot_command},' in rq:
       generated_text = self.chatgpt.getAnswer(message=rq,
