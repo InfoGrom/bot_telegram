@@ -85,11 +85,8 @@ class TelegramBot:
 
       inline_btn_5000 = types.InlineKeyboardButton(text='💳 Купить 5000 токенов за 1000 руб.', url='https://oplata.qiwi.com/form?invoiceUid=bd2ba94d-1237-45e9-8643-6cfaebfac131')
       inline_kb.add(inline_btn_5000)
-      
-      inline_btn_nonstop = types.InlineKeyboardButton(text='💳 Купить безлимит токенов за 2500 руб.', url='https://oplata.qiwi.com/form?invoiceUid=672431bf-17bc-4c2a-89ac-7810652bb5a3')
-      inline_kb.add(inline_btn_nonstop)
 
-      await message.answer("Вы можете купить токены и увеличить лимит запросов, нажав на кнопки ниже.", reply_markup=inline_kb)
+      await message.answer("Вы можете поддержать проект и купить токены, чтобы увеличить лимит запросов, нажав на кнопки ниже.", reply_markup=inline_kb)
 
   def GetUserSettings(self, userid):
     userdata = self.database.query(
@@ -152,14 +149,14 @@ class TelegramBot:
     await self.bot.send_chat_action(chat_id=message.chat.id, action='typing')
 
     # Ответное сообщение пользователю на реакцию:
-    if message.text == 'Ссылка':
+    if message.text == 'Дай ссылку':
         keyboard_markup = types.InlineKeyboardMarkup(row_width=2)
         url_button = types.InlineKeyboardButton(text='ДА', url='https://t.me/IvanovGPTbot')
         delete_button = types.InlineKeyboardButton(text='НЕТ', callback_data='delete')
         keyboard_markup.add(url_button, delete_button)
         await self.bot.send_message(
             chat_id=message.chat.id,
-            text='Вы искали ссылку на бота?',
+            text='Вы искали ссылку с ИИ?',
             reply_to_message_id=message.message_id,
             reply_markup=keyboard_markup
         )
@@ -201,7 +198,7 @@ class TelegramBot:
       generated_text = self.chatgpt.getAnswer(message=rq,
                                               lang="ru",
                                               temperature=0.7,
-                                              max_tokens=1000)
+                                              max_tokens=1500)
       await self.bot.send_message(chat_id=message.chat.id,
                                   text=generated_text["message"],
                                   reply_to_message_id=message_id)
