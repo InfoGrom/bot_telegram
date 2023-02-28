@@ -21,7 +21,6 @@ class TelegramBot:
     self.dp.message_handler(commands=["pay"])(self.pay_command_handler)
     self.dp.message_handler(commands=["info"])(self.info_command_handler)
     self.dp.message_handler(commands=["help"])(self.help_command_handler)
-    #self.dp.message_handler(commands=["help"])(self.ratings_command_handler)
     self.dp.message_handler()(self.echo_message)
 
     # Запуск бота
@@ -119,8 +118,9 @@ class TelegramBot:
                                 text=text,
                                 reply_to_message_id=message.message_id,
                                 parse_mode='HTML')
-    
-    
+
+  # Функция ответа на команду /ratings
+
   # Функция ответа на команду /help
   async def help_command_handler(self, message: types.Message):
     user_id = message.from_user.id
@@ -150,11 +150,8 @@ class TelegramBot:
     me = await self.bot.get_me()
     print(me.username)
 
-      # Анимация "Печатает":
-    await self.bot.send_chat_action(chat_id=message.chat.id, action='typing')
-
-    # Ответное сообщение пользователю на реакцию:
-    if message.text == 'Дай ссылку':
+    # Ответное сообщение пользователю на Ссылку:
+    if message.text == 'Ссылка':
         keyboard_markup = types.InlineKeyboardMarkup(row_width=2)
         url_button = types.InlineKeyboardButton(text='ДА', url='https://t.me/IvanovGPTbot')
         delete_button = types.InlineKeyboardButton(text='НЕТ', callback_data='delete')
@@ -200,12 +197,16 @@ class TelegramBot:
     # С запросом ключевого слова "Иванов":
     if self.name_bot_command in rq or f'{self.name_bot_command},' in rq:
       await self.bot.send_message(chat_id=message.chat.id,
-                                  text="⏳ Ожидайте...",
+                                  text="⏳ Ждите, формирую ответ...",
                                   reply_to_message_id=message_id)
+      
+      # Анимация "Печатает":
+      await self.bot.send_chat_action(chat_id=message.chat.id, action='typing')
+
       generated_text = self.chatgpt.getAnswer(message=rq,
                                               lang="ru",
                                               temperature=0.7,
-                                              max_tokens=1500)
+                                              max_tokens=1000)
       await self.bot.edit_message_text(chat_id=message.chat.id,
                                       text=generated_text["message"],
                                       message_id=message_id+1)
