@@ -206,10 +206,13 @@ class TelegramBot:
       generated_text = self.chatgpt.getAnswer(message=rq,
                                               lang="ru",
                                               temperature=0.7,
-                                              max_tokens=1000)
+                                              max_tokens=1500)
+      recipient_userid = message.from_user.id
       await self.bot.edit_message_text(chat_id=message.chat.id,
                                       text=generated_text["message"],
                                       message_id=message_id+1)
+      self.database.query(f"UPDATE settings SET tokens=tokens-5 WHERE userid={recipient_userid}", commit=True)
+      self.database.query(f"UPDATE settings SET balance=balance-0.5 WHERE userid={recipient_userid}", commit=True)
       print(
         f"(@{username} -> bot): {rq}\n(bot -> @{username}): {generated_text['message']}"
       )
