@@ -34,9 +34,9 @@ class TelegramBot:
                     lastname,
                     banned=0,
                     is_spam=1,
-                    balance=0,
+                    balance=10,
                     lang='ru',
-                    tokens=500,
+                    tokens=100,
                     ratings=0):
       try:
           userdata = self.database.query(f"SELECT * FROM users WHERE userid={userid}")
@@ -77,16 +77,16 @@ class TelegramBot:
   # Функция ответа на команду /pay
   async def pay_command_handler(self, message: types.Message):
       inline_kb = types.InlineKeyboardMarkup()
-      inline_btn_1000 = types.InlineKeyboardButton(text='💳 Купить 1000 токенов за 200 руб.', url='https://oplata.qiwi.com/form?invoiceUid=6811758a-7f78-4034-9abe-2c0c56720419')
+      inline_btn_1000 = types.InlineKeyboardButton(text='💳 Купить 1000 токенов за 100 руб.', url='https://oplata.qiwi.com/form?invoiceUid=00661439-561d-4d24-8276-1b2ff6974eac&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
       inline_kb.add(inline_btn_1000)
 
-      inline_btn_2500 = types.InlineKeyboardButton(text='💳 Купить 2500 токенов за 500 руб.', url='https://oplata.qiwi.com/form?invoiceUid=4b9a39ed-5872-466a-9aa5-c0a5dce47933')
-      inline_kb.add(inline_btn_2500)
+      inline_btn_2000 = types.InlineKeyboardButton(text='💳 Купить 2000 токенов за 200 руб.', url='https://oplata.qiwi.com/form?invoiceUid=6ae6ee15-e58f-44d1-af0d-abff076ab1fc&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
+      inline_kb.add(inline_btn_2000)
 
-      inline_btn_5000 = types.InlineKeyboardButton(text='💳 Купить 5000 токенов за 1000 руб.', url='https://oplata.qiwi.com/form?invoiceUid=bd2ba94d-1237-45e9-8643-6cfaebfac131')
-      inline_kb.add(inline_btn_5000)
+      inline_btn_4000 = types.InlineKeyboardButton(text='💳 Купить 4000 токенов за 400 руб.', url='https://oplata.qiwi.com/form?invoiceUid=ecde74f4-2f5d-434f-9c09-baca9a2c1323&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
+      inline_kb.add(inline_btn_4000)
 
-      await message.answer("Вы можете поддержать проект и купить токены, чтобы увеличить лимит запросов, нажав на кнопки ниже.", reply_markup=inline_kb)
+      await message.answer("Вы можете поддержать проект и купить токены, чтобы увеличить лимит запросов, нажав на кнопки ниже. После оплаты свяжитесь с тех.поддержкой: https://t.me/IvanovGPT_Forum/243 и сообщите об оплате с указанием вашего @username. Пример: Здравствуйте. Я @username, оплатил(а) 1000 токенов, обновите мой личный кабинет!", reply_markup=inline_kb)
 
   def GetUserSettings(self, userid):
     userdata = self.database.query(
@@ -115,6 +115,7 @@ class TelegramBot:
                                 text=text,
                                 reply_to_message_id=message.message_id,
                                 parse_mode='HTML')
+    
     
   # Функция ответа на команду /help
   async def help_command_handler(self, message: types.Message):
@@ -177,7 +178,7 @@ class TelegramBot:
             # получаем id пользователя, которому отправлена благодарность
             recipient_userid = message.reply_to_message.from_user.id
             # формируем текст сообщения с упоминанием пользователя
-            text = f"👍 <code>{username}</code> выразил(а) Вам благодарность!"
+            text = f"👍 <code>{username}</code> <b>выразил(а) Вам благодарность!</b>"
             # отправляем сообщение с упоминанием пользователя и парсингом HTML
             await self.bot.send_message(
                 chat_id=message.chat.id,
@@ -193,15 +194,18 @@ class TelegramBot:
             print(f"({username} -> bot): {rq}\n(bot -> {username}): {username} выразил(а) Вам благодарность!")
             return
         
-    # С запросом ключевого слова "Иванов":
+    # С запросом ключевого слова "Иванов" и вычетом токенов:
     if self.name_bot_command in rq or f'{self.name_bot_command},' in rq:
       generated_text = self.chatgpt.getAnswer(message=rq,
                                               lang="ru",
                                               temperature=0.7,
                                               max_tokens=1500)
+      recipient_userid = message.from_user.id
       await self.bot.send_message(chat_id=message.chat.id,
                                   text=generated_text["message"],
                                   reply_to_message_id=message_id)
+      self.database.query(f"UPDATE settings SET tokens=tokens-5 WHERE userid={recipient_userid}", commit=True)
+      self.database.query(f"UPDATE settings SET balance=balance-0.5 WHERE userid={recipient_userid}", commit=True)
       print(
         f"(@{username} -> bot): {rq}\n(bot -> @{username}): {generated_text['message']}"
       )
