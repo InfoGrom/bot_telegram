@@ -26,7 +26,7 @@ class ChatGPT:
     # max_tokens - максимальное количество токенов (по умолчанию: 1000)
     # temperature - степень человечности ответа от 0 до 1 (по умолчанию: 0.7)
     # engine_model - модель ChatGPT
-    def getAnswer(self, message, lang="ru", max_tokens=1500, temperature=0.7, engine_model="text-davinci-003"):
+    def getAnswer(self, message, lang="ru", max_tokens=1000, temperature=0.7, engine_model="text-davinci-003"):
         i = 0
         errors = False
         message = mtranslate.translate(message, "en", "auto")

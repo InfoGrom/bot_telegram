@@ -28,26 +28,30 @@ class TelegramBot:
     executor.start_polling(self.dp)
 
   def RegisterUser(self,
-                    username,
-                    userid,
-                    firstname,
-                    lastname,
-                    banned=0,
-                    is_spam=1,
-                    balance=10,
-                    lang='ru',
-                    tokens=100,
-                    ratings=0):
+                  username,
+                  userid,
+                  firstname,
+                  lastname,
+                  banned=0,
+                  is_spam=1,
+                  balance=10,
+                  lang='ru',
+                  tokens=100,
+                  ratings=0):
       try:
           userdata = self.database.query(f"SELECT * FROM users WHERE userid={userid}")
           if len(userdata) <= 0:
-              self.database.query(
-                  f"INSERT INTO users (username, userid, firstname, lastname, banned, is_spam) VALUES('{username}', '{userid}', '{firstname}', '{lastname}', {banned}, {is_spam})",
-                  commit=True)
-              self.database.query(
-                  f"INSERT INTO settings (userid, balance, lang, tokens, ratings) VALUES('{userid}', {balance}, '{lang}', {tokens}, {ratings})",
-                  commit=True)
-              return True
+              if balance > 0:
+                  self.database.query(
+                      f"INSERT INTO users (username, userid, firstname, lastname, banned, is_spam) VALUES('{username}', '{userid}', '{firstname}', '{lastname}', {banned}, {is_spam})",
+                      commit=True)
+                  self.database.query(
+                      f"INSERT INTO settings (userid, balance, lang, tokens, ratings) VALUES('{userid}', {balance}, '{lang}', {tokens}, {ratings})",
+                      commit=True)
+                  return True
+              else:
+                  self.bot.send_message(chat_id=userid, text="Ваш баланс близок к 0, пожалуйста пополните баланс с помощью команды /pay!")
+                  return False
           return False
       except:
           return False
@@ -193,18 +197,31 @@ class TelegramBot:
             print(f"({username} -> bot): {rq}\n(bot -> {username}): {username} выразил(а) Вам благодарность!")
             return
         
-    # С запросом ключевого слова "Иванов" и вычетом токенов:
+    # С запросом ключевого слова "Иванов":
     if self.name_bot_command in rq or f'{self.name_bot_command},' in rq:
+      await self.bot.send_message(chat_id=message.chat.id,
+                                  text="⏳ Ожидайте...",
+                                  reply_to_message_id=message_id)
       generated_text = self.chatgpt.getAnswer(message=rq,
                                               lang="ru",
                                               temperature=0.7,
                                               max_tokens=1500)
-      recipient_userid = message.from_user.id
-      await self.bot.send_message(chat_id=message.chat.id,
-                                  text=generated_text["message"],
-                                  reply_to_message_id=message_id)
-      self.database.query(f"UPDATE settings SET tokens=tokens-5 WHERE userid={recipient_userid}", commit=True)
-      self.database.query(f"UPDATE settings SET balance=balance-0.5 WHERE userid={recipient_userid}", commit=True)
+      await self.bot.edit_message_text(chat_id=message.chat.id,
+                                      text=generated_text["message"],
+                                      message_id=message_id+1)
       print(
         f"(@{username} -> bot): {rq}\n(bot -> @{username}): {generated_text['message']}"
       )
+
+  # Функция проверки и вычитания токенов
+  def CheckTokens(self, userid, text):
+        userdata = self.database.query(f"SELECT * FROM settings WHERE userid='{userid}'")
+            
+        tokens = text.split()
+        num_tokens = len(tokens)
+
+        if(num_tokens > userdata["tokens"]):
+            return False
+            
+        self.database.query(f"UPDATE settings SET tokens={int(userdata['tokens']) - num_tokens} WHERE userid='{userid}'", commit=True)
+        return True
