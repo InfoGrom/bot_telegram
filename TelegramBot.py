@@ -189,7 +189,6 @@ class TelegramBot:
 
             # увеличиваем количество ratings в таблице settings базы данных на 1
             self.database.query(f"UPDATE settings SET ratings=ratings+1 WHERE userid={recipient_userid}", commit=True)
-            self.database.query(f"UPDATE settings SET tokens=tokens+0.25 WHERE userid={recipient_userid}", commit=True)
             # выводим сообщение об успешной отправке
             print(f"({username} -> bot): {rq}\n(bot -> {username}): {username} выразил(а) Вам благодарность!")
             return
