@@ -80,16 +80,25 @@ class TelegramBot:
   # Функция ответа на команду /pay
   async def pay_command_handler(self, message: types.Message):
       inline_kb = types.InlineKeyboardMarkup()
-      inline_btn_1000 = types.InlineKeyboardButton(text='💳 Купить 1000 токенов за 100 руб.', url='https://oplata.qiwi.com/form?invoiceUid=00661439-561d-4d24-8276-1b2ff6974eac&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
+      inline_btn_500 = types.InlineKeyboardButton(text='💳 Купить 500 токенов за 59 руб.', url='https://oplata.qiwi.com/form?invoiceUid=bbca21dd-ae7b-4acf-ad33-14b127906808&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
+      inline_kb.add(inline_btn_500)
+
+      inline_btn_1000 = types.InlineKeyboardButton(text='💳 Купить 1000 токенов за 99 руб.', url='https://oplata.qiwi.com/form?invoiceUid=9087c35a-17a1-482f-91d7-294d59effe0c&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
       inline_kb.add(inline_btn_1000)
 
-      inline_btn_2000 = types.InlineKeyboardButton(text='💳 Купить 2000 токенов за 200 руб.', url='https://oplata.qiwi.com/form?invoiceUid=6ae6ee15-e58f-44d1-af0d-abff076ab1fc&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
+      inline_btn_2000 = types.InlineKeyboardButton(text='💳 Купить 2000 токенов за 199 руб.', url='https://oplata.qiwi.com/form?invoiceUid=fa13e3ff-dbab-4b3b-8d24-7ed6ebe7847e&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
       inline_kb.add(inline_btn_2000)
 
-      inline_btn_4000 = types.InlineKeyboardButton(text='💳 Купить 4000 токенов за 400 руб.', url='https://oplata.qiwi.com/form?invoiceUid=ecde74f4-2f5d-434f-9c09-baca9a2c1323&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
-      inline_kb.add(inline_btn_4000)
+      inline_btn_5000 = types.InlineKeyboardButton(text='💳 Купить 5000 токенов за 499 руб.', url='https://oplata.qiwi.com/form?invoiceUid=e592f04a-a2ef-4a27-be59-9594d1159ac9&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
+      inline_kb.add(inline_btn_5000)
 
-      await message.answer("Вы можете поддержать проект и купить токены, чтобы увеличить лимит запросов, нажав на кнопки ниже. После оплаты свяжитесь с тех.поддержкой: https://t.me/IvanovGPT_Forum/243 и сообщите об оплате с указанием вашего @username. Пример: Здравствуйте. Я @username, оплатил(а) 1000 токенов, обновите мой личный кабинет!", reply_markup=inline_kb)
+      inline_btn_10000 = types.InlineKeyboardButton(text='💳 Купить 10000 токенов за 999 руб.', url='https://oplata.qiwi.com/form?invoiceUid=7b856b28-0fd8-4151-9aab-8dd3c0ae8f7f&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
+      inline_kb.add(inline_btn_10000)
+
+      inline_btn_20000 = types.InlineKeyboardButton(text='💳 Купить 20000 токенов за 1999 руб.', url='https://oplata.qiwi.com/form?invoiceUid=b7a9dafa-05b9-4a74-a59a-1044ec38deb9&successUrl=https%3A%2F%2Ft.me%2FIvanovGPTbot')
+      inline_kb.add(inline_btn_20000)
+
+      await message.answer("💰 Тарифы и стоимость. 1 токен ~ 1 символ на русском языке или 4 символа на английском:", reply_markup=inline_kb)
 
   def GetUserSettings(self, userid):
     userdata = self.database.query(
